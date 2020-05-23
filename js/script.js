@@ -100,7 +100,33 @@ function processData(results) {
         totalCases,         // 6
         tested_cases        // 7
     ]
+    updateData(data);
     createGraph(data);
+}
+
+
+function getDelta(data) {
+    if (data[1] >= data[0]) {
+        return `+ ${data[1] - data[0]}`;
+    } else {
+        return `- ${Math.abs(data[1] - data[0])}`;
+    }
+}
+
+
+function updateData(data) {
+    let totalCases = data[6].slice(-2);
+    $('#total-cases-p').text(`${totalCases[1]}`);
+    $('#total-cases-delta-p').text(getDelta(totalCases));
+    let activeCases = data[1].slice(-2);
+    $('#active-cases-p').text(`${activeCases[1]}`);
+    $('#active-cases-delta-p').text(getDelta(activeCases));
+    let recovered = data[4].slice(-2);
+    $('#recovered-p').text(`${recovered[1]}`);
+    $('#recovered-delta-p').text(getDelta(recovered));
+    let deaths = data[5].slice(-2);
+    $('#deaths-p').text(`${deaths[1]}`);
+    $('#deaths-delta-p').text(getDelta(deaths));
 }
 
 
@@ -157,4 +183,6 @@ function createGraph(data) {
     });
 }
 
-$(document).ready(fetchData());
+
+$(document).ready(fetchData);
+window.onresize = fetchData;

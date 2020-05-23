@@ -100,3 +100,32 @@ body {
     outline: none !important;
     box-shadow: none !important;
 }
+
+.text-xs {
+    font-size: .7rem;
+}
+
+.text-sm {
+    font-size: .9rem;
+}
+
+.text-lg {
+    font-size: 1.25rem;
+}
+
+.border-left-blue {
+    border-left: .25rem solid blue;
+}
+
+
+.border-left-cyan {
+    border-left: .25rem solid cyan;
+}
+
+.border-left-green {
+    border-left: .25rem solid green;
+}
+
+.border-left-red {
+    border-left: .25rem solid red;
+}
