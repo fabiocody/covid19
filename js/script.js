@@ -65,10 +65,10 @@ function fetchData() {
 
 
 function processData(results) {
-    console.log(results.data[0]);
+    //console.log(results.data[0]);
     results.data.shift();
-    results.data.pop();
-    results.data.pop();
+    results.data = results.data.filter(row => row.length > 1);
+    //console.log(results.data);
     let date = [];
     let activeCases = [];
     let deltaActiveCases = [];
