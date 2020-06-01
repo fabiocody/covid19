@@ -50,6 +50,19 @@ function last7DaysClicked() {
 }
 
 
+function ediff1d(v) {
+    let d = [];
+    for (let i = 0; i < v.length - 1; i++) {
+        if (i === 0) {
+            d.push(0);
+        } else {
+            d.push(v[i + 1] - v[i]);
+        }
+    }
+    return d;
+}
+
+
 function fetchData() {
     let URL;
     if (region === 'Italy') {
