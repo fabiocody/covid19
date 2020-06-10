@@ -7,7 +7,7 @@ let region = 'Italy';
 
 function btnItalyClicked() {
     $('#btn-italy').addClass('active');
-    $('#btn-lombardy').removeClass('active');
+    $('#btn-lombardy').removeClass('active').addClass('disabled');
     $('#title').text('COVID-19 | Italy');
     region = 'Italy';
     fetchData();
@@ -52,14 +52,24 @@ function last7DaysClicked() {
 
 function ediff1d(v) {
     let d = [];
-    for (let i = 0; i < v.length - 1; i++) {
+    for (let i = 0; i < v.length; i++) {
         if (i === 0) {
             d.push(0);
         } else {
-            d.push(v[i + 1] - v[i]);
+            d.push(v[i] - v[i-1]);
         }
     }
     return d;
+}
+
+
+function arrayDiv(v, d) {
+    console.assert(v.length === d.length);
+    let r = [];
+    for (let i = 0; i < v.length; i++) {
+        r.push(v[i] / d[i]);
+    }
+    return r;
 }
 
 
@@ -67,21 +77,36 @@ function fetchData() {
     let URL;
     if (region === 'Italy') {
         URL = 'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-andamento-nazionale/dpc-covid19-ita-andamento-nazionale.csv';
-    }/* else if (region === 'Lombardy') {           LOMBARDY NEEDS A DIFFERENT PREPROCESS FUNCTION DUE TO THE DIFFERENT CSV HEADER
+        Papa.parse(URL, {
+            download: true,
+            complete: processDataItaly
+        });
+    } else if (region === 'Lombardy') {
         URL = 'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-regioni/dpc-covid19-ita-regioni.csv';
-    }*/
-    Papa.parse(URL, {
-        download: true,
-        complete: processData
-    });
+        Papa.parse(URL, {
+            download: true,
+            complete: processDataLombardy
+        });
+    }
 }
 
 
-function processData(results) {
+function processDataItaly(results) {
+    let indexes = [0, 6, 7, 8, 9, 10, 11, 13];
+    processData(results, indexes);
+}
+
+
+function processDataLombardy(results) {
+    let indexes = [0, 10, 11, 12, 13, 14, 15, 17];
+    processData(results, indexes);
+}
+
+
+function processData(results, indexes) {
     //console.log(results.data[0]);
     results.data.shift();
     results.data = results.data.filter(row => row.length > 1);
-    //console.log(results.data);
     let date = [];
     let activeCases = [];
     let deltaActiveCases = [];
@@ -89,20 +114,23 @@ function processData(results) {
     let recovered = [];
     let deaths = [];
     let totalCases = [];
-    let tested_cases = [];
+    let testedCases = [];
     if (!isNaN(daysToShow)) {
         results.data = results.data.slice(Math.max(results.data.length - daysToShow, 0));
     }
     for (let row of results.data) {
-        date.push(row[0]);
-        activeCases.push(row[6]);
-        deltaActiveCases.push(row[7]);
-        deltaTotalCases.push(row[8]);
-        recovered.push(row[9]);
-        deaths.push(row[10]);
-        totalCases.push(row[11]);
-        tested_cases.push(row[13]);
+        date.push(row[indexes[0]]);
+        activeCases.push(row[indexes[1]]);
+        deltaActiveCases.push(row[indexes[2]]);
+        deltaTotalCases.push(row[indexes[3]]);
+        recovered.push(row[indexes[4]]);
+        deaths.push(row[indexes[5]]);
+        totalCases.push(row[indexes[6]]);
+        testedCases.push(row[indexes[7]]);
     }
+    let deltaRecovered = ediff1d(recovered);
+    let deltaDeaths = ediff1d(deaths);
+    let deltaTested = ediff1d(testedCases);
     let data = [
         date,               // 0
         activeCases,        // 1
@@ -111,10 +139,15 @@ function processData(results) {
         recovered,          // 4
         deaths,             // 5
         totalCases,         // 6
-        tested_cases        // 7
+        testedCases,        // 7
+        deltaRecovered,     // 8
+        deltaDeaths,        // 9
+        deltaTested,        // 10
     ]
+    ediff1d(totalCases);
     updateData(data);
-    createGraph(data);
+    createDataGraph(data);
+    createDeltaGraph(data);
 }
 
 
@@ -143,8 +176,8 @@ function updateData(data) {
 }
 
 
-function createGraph(data) {
-    let ctx = document.getElementById('chart');
+function createDataGraph(data) {
+    let ctx = document.getElementById('data-chart');
     return new Chart(ctx, {
         type: 'line',
         data: {
@@ -185,6 +218,70 @@ function createGraph(data) {
             ]
         },
         options: {
+            title: {
+                display: true,
+                fontSize: 18,
+                text: 'Data'
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: false
+                    }
+                }]
+            },
+        }
+    });
+}
+
+
+function createDeltaGraph(data) {
+    let ctx = document.getElementById('delta-chart');
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data[0],
+            datasets: [
+                {
+                    label: '∆ Total cases',
+                    data: data[3],
+                    lineTension: 0.3,
+                    backgroundColor: 'transparent',
+                    borderWidth: 3,
+                    borderColor: 'blue'
+                },
+                {
+                    label: '∆ Active cases',
+                    data: data[2],
+                    lineTension: 0.3,
+                    backgroundColor: 'transparent',
+                    borderWidth: 3,
+                    borderColor: 'cyan'
+                },
+                {
+                    label: '∆ Recovered',
+                    data: data[8],
+                    lineTension: 0.3,
+                    backgroundColor: 'transparent',
+                    borderWidth: 3,
+                    borderColor: 'green'
+                },
+                {
+                    label: '∆ Deaths',
+                    data: data[9],
+                    lineTension: 0.3,
+                    backgroundColor: 'transparent',
+                    borderWidth: 3,
+                    borderColor: 'red'
+                }
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                fontSize: 18,
+                text: 'Delta'
+            },
             scales: {
                 yAxes: [{
                     ticks: {

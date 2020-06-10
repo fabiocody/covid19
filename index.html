@@ -37,13 +37,13 @@
       <div class="sidebar-sticky pt-3">
         <ul class="nav flex-column">
           <li class="nav-item">
-            <button id="btn-italy" class="nav-link active btn btn-link" onclick="btnItalyClicked()">
+            <button id="btn-italy" class="nav-link btn btn-link active" onclick="btnItalyClicked()">
               <i class="fas fa-globe"></i>
               Italy
             </button>
           </li>
           <li class="nav-item">
-            <button id="btn-lombardy" class="nav-link btn btn-link" onclick="btnLombardyClicked()">
+            <button id="btn-lombardy" class="nav-link btn btn-link disabled" onclick="btnLombardyClicked()">
               <i class="fas fa-map-marker-alt"></i>
               Lombardy
             </button>
@@ -111,7 +111,10 @@
       </div>
     </div>
 
-    <canvas class="my-4 w-100" id="chart" width="900" height="380"></canvas>
+    <hr>
+    <canvas class="my-4 w-100" id="data-chart" width="900" height="380"></canvas>
+    <hr>
+    <canvas class="my-4 w-100" id="delta-chart" width="900" height="380"></canvas>
   </main>
 </div>
 
