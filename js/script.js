@@ -92,7 +92,7 @@ function fetchData() {
 
 
 function processDataItaly(results) {
-    let indexes = [0, 6, 7, 8, 9, 10, 11, 13];
+    let indexes = [0, 6, 7, 8, 9, 10, 13, 15];
     processData(results, indexes);
 }
 
