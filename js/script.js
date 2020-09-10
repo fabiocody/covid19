@@ -3,6 +3,22 @@
 
 let daysToShow = NaN;
 let region = 'Italy';
+let data = null;
+let dataGraph = null;
+let deltaGraph = null;
+let testsGraph = null;
+
+const dateIdx = 0;
+const totalCasesIdx = 1;
+const activeCasesIdx = 2;
+const recoveredIdx = 3;
+const deathsIdx = 4;
+const testsIdx = 5;
+const deltaTotalCasesIdx = 6;
+const deltaActiveCasesIdx = 7;
+const deltaRecoveredIdx = 8;
+const deltaDeathsIdx = 9;
+const deltaTestsIdx = 10;
 
 
 function btnItalyClicked() {
@@ -28,7 +44,7 @@ function allDataClicked() {
     $('#btn-30-days').removeClass('active');
     $('#btn-7-days').removeClass('active');
     daysToShow = NaN;
-    fetchData();
+    updatePage();
 }
 
 
@@ -37,7 +53,7 @@ function last30DaysClicked() {
     $('#btn-30-days').addClass('active');
     $('#btn-7-days').removeClass('active');
     daysToShow = 30;
-    fetchData();
+    updatePage();
 }
 
 
@@ -46,7 +62,7 @@ function last7DaysClicked() {
     $('#btn-30-days').removeClass('active');
     $('#btn-7-days').addClass('active');
     daysToShow = 7;
-    fetchData();
+    updatePage();
 }
 
 
@@ -70,6 +86,12 @@ function arrayDiv(v, d) {
         r.push(v[i] / d[i]);
     }
     return r;
+}
+
+
+function arrayDivPercent(v, d) {
+    let r = arrayDiv(v, d);
+    return r.map((v) => v * 100.0);
 }
 
 
@@ -114,10 +136,7 @@ function processData(results, indexes) {
     let recovered = [];
     let deaths = [];
     let totalCases = [];
-    let testedCases = [];
-    if (!isNaN(daysToShow)) {
-        results.data = results.data.slice(Math.max(results.data.length - daysToShow, 0));
-    }
+    let tests = [];
     for (let row of results.data) {
         date.push(row[indexes[0]]);
         activeCases.push(row[indexes[1]]);
@@ -126,28 +145,33 @@ function processData(results, indexes) {
         recovered.push(row[indexes[4]]);
         deaths.push(row[indexes[5]]);
         totalCases.push(row[indexes[6]]);
-        testedCases.push(row[indexes[7]]);
+        tests.push(row[indexes[7]]);
     }
     let deltaRecovered = ediff1d(recovered);
     let deltaDeaths = ediff1d(deaths);
-    let deltaTested = ediff1d(testedCases);
-    let data = [
+    let deltaTests = ediff1d(tests);
+    data = [
         date,               // 0
-        activeCases,        // 1
-        deltaActiveCases,   // 2
-        deltaTotalCases,    // 3
-        recovered,          // 4
-        deaths,             // 5
-        totalCases,         // 6
-        testedCases,        // 7
+        totalCases,         // 1
+        activeCases,        // 2
+        recovered,          // 3
+        deaths,             // 4
+        tests,              // 5
+        deltaTotalCases,    // 6
+        deltaActiveCases,   // 7
         deltaRecovered,     // 8
         deltaDeaths,        // 9
-        deltaTested,        // 10
+        deltaTests,         // 10
     ]
-    ediff1d(totalCases);
-    updateData(data);
-    createDataGraph(data);
-    createDeltaGraph(data);
+    updatePage();
+}
+
+
+function updatePage() {
+    updateData();
+    createDataGraph();
+    createDeltaGraph();
+    createTestsGraph();
 }
 
 
@@ -160,139 +184,216 @@ function getDelta(data) {
 }
 
 
-function updateData(data) {
-    let totalCases = data[6].slice(-2);
+function updateData() {
+    let totalCases = data[totalCasesIdx].slice(-2);
     $('#total-cases-p').text(`${totalCases[1]}`);
     $('#total-cases-delta-p').text(getDelta(totalCases));
-    let activeCases = data[1].slice(-2);
+    let activeCases = data[activeCasesIdx].slice(-2);
     $('#active-cases-p').text(`${activeCases[1]}`);
     $('#active-cases-delta-p').text(getDelta(activeCases));
-    let recovered = data[4].slice(-2);
+    let recovered = data[recoveredIdx].slice(-2);
     $('#recovered-p').text(`${recovered[1]}`);
     $('#recovered-delta-p').text(getDelta(recovered));
-    let deaths = data[5].slice(-2);
+    let deaths = data[deathsIdx].slice(-2);
     $('#deaths-p').text(`${deaths[1]}`);
     $('#deaths-delta-p').text(getDelta(deaths));
 }
 
 
-function createDataGraph(data) {
-    let ctx = document.getElementById('data-chart');
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data[0],
-            datasets: [
-                {
-                    label: 'Total cases',
-                    data: data[6],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'blue'
-                },
-                {
-                    label: 'Active cases',
-                    data: data[1],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'cyan'
-                },
-                {
-                    label: 'Recovered',
-                    data: data[4],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'green'
-                },
-                {
-                    label: 'Deaths',
-                    data: data[5],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'red'
-                }
-            ]
-        },
-        options: {
-            title: {
-                display: true,
-                fontSize: 18,
-                text: 'Data'
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: false
+function createDataGraph() {
+    if (dataGraph == null) {
+        let ctx = document.getElementById('data-chart');
+        dataGraph = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data[dateIdx],
+                datasets: [
+                    {
+                        label: 'Total cases',
+                        data: data[totalCasesIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'blue'
+                    },
+                    {
+                        label: 'Active cases',
+                        data: data[activeCasesIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'cyan'
+                    },
+                    {
+                        label: 'Recovered',
+                        data: data[recoveredIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'green'
+                    },
+                    {
+                        label: 'Deaths',
+                        data: data[deathsIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'red'
                     }
-                }]
+                ]
             },
+            options: {
+                title: {
+                    display: true,
+                    fontSize: 18,
+                    text: 'Data'
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                },
+            }
+        });
+    } else {
+        let dataToShow = [...data];
+        if (!isNaN(daysToShow)) {
+            for (let i = 0; i < dataToShow.length; i++)
+                dataToShow[i] = data[i].slice(Math.max(data[i].length - daysToShow, 0));
         }
-    });
+        dataGraph.data.labels = dataToShow[dateIdx];
+        for (let i = 0; i < dataGraph.data.datasets.length; i++) {
+            dataGraph.data.datasets[i].data = dataToShow[i + 1]
+        }
+        dataGraph.update();
+    }
+    return dataGraph;
 }
 
 
-function createDeltaGraph(data) {
-    let ctx = document.getElementById('delta-chart');
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data[0],
-            datasets: [
-                {
-                    label: '∆ Total cases',
-                    data: data[3],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'blue'
-                },
-                {
-                    label: '∆ Active cases',
-                    data: data[2],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'cyan'
-                },
-                {
-                    label: '∆ Recovered',
-                    data: data[8],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'green'
-                },
-                {
-                    label: '∆ Deaths',
-                    data: data[9],
-                    lineTension: 0.3,
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    borderColor: 'red'
-                }
-            ]
-        },
-        options: {
-            title: {
-                display: true,
-                fontSize: 18,
-                text: 'Delta'
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: false
+function createDeltaGraph() {
+    if (deltaGraph == null) {
+        let ctx = document.getElementById('delta-chart');
+        deltaGraph = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data[dateIdx],
+                datasets: [
+                    {
+                        label: '∆ Total cases',
+                        data: data[deltaTotalCasesIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'blue'
+                    },
+                    {
+                        label: '∆ Active cases',
+                        data: data[deltaActiveCasesIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'cyan'
+                    },
+                    {
+                        label: '∆ Recovered',
+                        data: data[deltaRecoveredIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'green'
+                    },
+                    {
+                        label: '∆ Deaths',
+                        data: data[deltaDeathsIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'red'
                     }
-                }]
+                ]
             },
+            options: {
+                title: {
+                    display: true,
+                    fontSize: 18,
+                    text: 'Delta'
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                },
+            }
+        });
+    } else {
+        let dataToShow = [...data];
+        if (!isNaN(daysToShow)) {
+            for (let i = 0; i < dataToShow.length; i++)
+                dataToShow[i] = data[i].slice(Math.max(data[i].length - daysToShow, 0));
         }
-    });
+        deltaGraph.data.labels = dataToShow[dateIdx];
+        for (let i = 0; i < deltaGraph.data.datasets.length; i++) {
+            deltaGraph.data.datasets[i].data = dataToShow[i + 6]
+        }
+        deltaGraph.update();
+    }
+    return deltaGraph;
+}
+
+
+function createTestsGraph() {
+    if (testsGraph == null) {
+        let ctx = document.getElementById('tests-chart');
+        testsGraph = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data[dateIdx],
+                datasets: [
+                    {
+                        label: '∆ Total / ∆ Tests',
+                        data: arrayDivPercent(data[deltaTotalCasesIdx], data[deltaTestsIdx]),
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'orange'
+                    },
+                ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    fontSize: 18,
+                    text: '∆ Total / ∆ Tests'
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                },
+            }
+        });
+    } else {
+        let dataToShow = [...data];
+        if (!isNaN(daysToShow)) {
+            for (let i = 0; i < dataToShow.length; i++)
+                dataToShow[i] = data[i].slice(Math.max(data[i].length - daysToShow, 0));
+        }
+        testsGraph.data.labels = dataToShow[dateIdx];
+        for (let i = 0; i < testsGraph.data.datasets.length; i++) {
+            testsGraph.data.datasets[i].data = arrayDivPercent(dataToShow[deltaTotalCasesIdx], dataToShow[deltaTestsIdx])
+        }
+        testsGraph.update();
+    }
+    return testsGraph;
 }
 
 
 $(document).ready(fetchData);
-window.onresize = fetchData;
+window.onresize = updatePage;
