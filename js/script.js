@@ -89,12 +89,6 @@ function arrayDiv(v, d) {
 }
 
 
-function arrayDivPercent(v, d) {
-    let r = arrayDiv(v, d);
-    return r.map((v) => v * 100.0);
-}
-
-
 function fetchData() {
     let URL;
     if (region === 'Italy') {
@@ -356,7 +350,7 @@ function createTestsGraph() {
                 datasets: [
                     {
                         label: '∆ Total / ∆ Tests',
-                        data: arrayDivPercent(data[deltaTotalCasesIdx], data[deltaTestsIdx]),
+                        data: arrayDiv(data[deltaTotalCasesIdx], data[deltaTestsIdx]),
                         lineTension: 0.3,
                         backgroundColor: 'transparent',
                         borderWidth: 3,
@@ -387,7 +381,7 @@ function createTestsGraph() {
         }
         testsGraph.data.labels = dataToShow[dateIdx];
         for (let i = 0; i < testsGraph.data.datasets.length; i++) {
-            testsGraph.data.datasets[i].data = arrayDivPercent(dataToShow[deltaTotalCasesIdx], dataToShow[deltaTestsIdx])
+            testsGraph.data.datasets[i].data = arrayDiv(dataToShow[deltaTotalCasesIdx], dataToShow[deltaTestsIdx])
         }
         testsGraph.update();
     }
