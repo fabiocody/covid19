@@ -129,3 +129,7 @@ body {
 .border-left-red {
     border-left: .25rem solid red;
 }
+
+.border-left-orange {
+    border-left: .25rem solid orange
+}

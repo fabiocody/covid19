@@ -108,7 +108,7 @@ function fetchData() {
 
 
 function processDataItaly(results) {
-    let indexes = [0, 6, 7, 8, 9, 10, 13, 15];
+    let indexes = [0, 6, 7, 8, 9, 10, 13, 14];
     processData(results, indexes);
 }
 
@@ -191,6 +191,9 @@ function updateData() {
     let deaths = data[deathsIdx].slice(-2);
     $('#deaths-p').text(`${deaths[1]}`);
     $('#deaths-delta-p').text(getDelta(deaths));
+    let tests = data[testsIdx].slice(-2);
+    $('#tests-p').text(`${tests[1]}`);
+    $('#tests-delta-p').text(`${getDelta(tests)}`);
 }
 
 
