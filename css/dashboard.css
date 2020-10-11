@@ -131,5 +131,9 @@ body {
 }
 
 .border-left-orange {
-    border-left: .25rem solid orange
+    border-left: .25rem solid orange;
+}
+
+.border-left-teal {
+    border-left: .25rem solid teal;
 }

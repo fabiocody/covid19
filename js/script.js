@@ -13,12 +13,14 @@ const totalCasesIdx = 1;
 const activeCasesIdx = 2;
 const recoveredIdx = 3;
 const deathsIdx = 4;
-const testsIdx = 5;
-const deltaTotalCasesIdx = 6;
-const deltaActiveCasesIdx = 7;
-const deltaRecoveredIdx = 8;
-const deltaDeathsIdx = 9;
-const deltaTestsIdx = 10;
+const hospitalizedIdx = 5;
+const testsIdx = 6;
+const deltaTotalCasesIdx = 7;
+const deltaActiveCasesIdx = 8;
+const deltaRecoveredIdx = 9;
+const deltaDeathsIdx = 10;
+const deltaHospitalizedIdx = 11;
+const deltaTestsIdx = 12;
 
 
 function btnItalyClicked() {
@@ -108,7 +110,7 @@ function fetchData() {
 
 
 function processDataItaly(results) {
-    let indexes = [0, 6, 7, 8, 9, 10, 13, 14];
+    let indexes = [0, 4, 6, 7, 8, 9, 10, 13, 14];
     processData(results, indexes);
 }
 
@@ -124,6 +126,7 @@ function processData(results, indexes) {
     results.data.shift();
     results.data = results.data.filter(row => row.length > 1);
     let date = [];
+    let hospitalized = [];
     let activeCases = [];
     let deltaActiveCases = [];
     let deltaTotalCases = [];
@@ -133,29 +136,33 @@ function processData(results, indexes) {
     let tests = [];
     for (let row of results.data) {
         date.push(row[indexes[0]]);
-        activeCases.push(row[indexes[1]]);
-        deltaActiveCases.push(row[indexes[2]]);
-        deltaTotalCases.push(row[indexes[3]]);
-        recovered.push(row[indexes[4]]);
-        deaths.push(row[indexes[5]]);
-        totalCases.push(row[indexes[6]]);
-        tests.push(row[indexes[7]]);
+        hospitalized.push(row[indexes[1]]);
+        activeCases.push(row[indexes[2]]);
+        deltaActiveCases.push(row[indexes[3]]);
+        deltaTotalCases.push(row[indexes[4]]);
+        recovered.push(row[indexes[5]]);
+        deaths.push(row[indexes[6]]);
+        totalCases.push(row[indexes[7]]);
+        tests.push(row[indexes[8]]);
     }
     let deltaRecovered = ediff1d(recovered);
     let deltaDeaths = ediff1d(deaths);
     let deltaTests = ediff1d(tests);
+    let deltaHospitalized = ediff1d(hospitalized);
     data = [
         date,               // 0
         totalCases,         // 1
         activeCases,        // 2
         recovered,          // 3
         deaths,             // 4
-        tests,              // 5
-        deltaTotalCases,    // 6
-        deltaActiveCases,   // 7
-        deltaRecovered,     // 8
-        deltaDeaths,        // 9
-        deltaTests,         // 10
+        hospitalized,       // 5
+        tests,              // 6
+        deltaTotalCases,    // 7
+        deltaActiveCases,   // 8
+        deltaRecovered,     // 9
+        deltaDeaths,        // 10
+        deltaHospitalized,  // 11
+        deltaTests,         // 12
     ]
     updatePage();
 }
@@ -191,6 +198,9 @@ function updateData() {
     let deaths = data[deathsIdx].slice(-2);
     $('#deaths-p').text(`${deaths[1]}`);
     $('#deaths-delta-p').text(getDelta(deaths));
+    let hospitalized = data[hospitalizedIdx].slice(-2);
+    $('#hospitalized-p').text(`${hospitalized[1]}`);
+    $('#hospitalized-delta-p').text(`${getDelta(hospitalized)}`);
     let tests = data[testsIdx].slice(-2);
     $('#tests-p').text(`${tests[1]}`);
     $('#tests-delta-p').text(`${getDelta(tests)}`);
@@ -236,6 +246,14 @@ function createDataGraph() {
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         borderColor: 'red'
+                    },
+                    {
+                        label: 'Hospitalized',
+                        data: data[hospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'teal'
                     }
                 ]
             },
@@ -309,6 +327,14 @@ function createDeltaGraph() {
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         borderColor: 'red'
+                    },
+                    {
+                        label: '∆ Hospitalized',
+                        data: data[deltaHospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'teal'
                     }
                 ]
             },
