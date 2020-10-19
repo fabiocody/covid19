@@ -361,7 +361,7 @@ function createDeltaGraph() {
         }
         deltaGraph.data.labels = dataToShow[dateIdx];
         for (let i = 0; i < deltaGraph.data.datasets.length; i++) {
-            deltaGraph.data.datasets[i].data = dataToShow[i + 6]
+            deltaGraph.data.datasets[i].data = dataToShow[i + 7]
         }
         deltaGraph.update();
     }
