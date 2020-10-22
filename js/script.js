@@ -381,7 +381,7 @@ function createDeltaGraph() {
 function createHospitalizedGraph() {
     if (hospitalizedGraph == null) {
         let ctx = document.getElementById('hospitalized-chart');
-        dataGraph = new Chart(ctx, {
+        hospitalizedGraph = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: data[dateIdx],
@@ -433,20 +433,20 @@ function createHospitalizedGraph() {
             for (let i = 0; i < dataToShow.length; i++)
                 dataToShow[i] = data[i].slice(Math.max(data[i].length - daysToShow, 0));
         }
-        dataGraph.data.labels = dataToShow[dateIdx];
-        for (let i = 0; i < dataGraph.data.datasets.length; i++) {
-            dataGraph.data.datasets[i].data = dataToShow[i + 5]
+        hospitalizedGraph.data.labels = dataToShow[dateIdx];
+        for (let i = 0; i < hospitalizedGraph.data.datasets.length; i++) {
+            hospitalizedGraph.data.datasets[i].data = dataToShow[i + 5]
         }
-        dataGraph.update();
+        hospitalizedGraph.update();
     }
-    return dataGraph;
+    return hospitalizedGraph;
 }
 
 
 function createDeltaHospitalizedGraph() {
     if (deltaHospitalizedGraph == null) {
         let ctx = document.getElementById('delta-hospitalized-chart');
-        deltaGraph = new Chart(ctx, {
+        deltaHospitalizedGraph = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: data[dateIdx],
@@ -498,13 +498,13 @@ function createDeltaHospitalizedGraph() {
             for (let i = 0; i < dataToShow.length; i++)
                 dataToShow[i] = data[i].slice(Math.max(data[i].length - daysToShow, 0));
         }
-        deltaGraph.data.labels = dataToShow[dateIdx];
-        for (let i = 0; i < deltaGraph.data.datasets.length; i++) {
-            deltaGraph.data.datasets[i].data = dataToShow[i + 13]
+        deltaHospitalizedGraph.data.labels = dataToShow[dateIdx];
+        for (let i = 0; i < deltaHospitalizedGraph.data.datasets.length; i++) {
+            deltaHospitalizedGraph.data.datasets[i].data = dataToShow[i + 13]
         }
-        deltaGraph.update();
+        deltaHospitalizedGraph.update();
     }
-    return deltaGraph;
+    return deltaHospitalizedGraph;
 }
 
 
