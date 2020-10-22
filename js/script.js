@@ -6,6 +6,8 @@ let region = 'Italy';
 let data = null;
 let dataGraph = null;
 let deltaGraph = null;
+let hospitalizedGraph = null;
+let deltaHospitalizedGraph = null;
 let testsGraph = null;
 
 const metricsNumber = 8;
@@ -184,10 +186,11 @@ function processData(results, indexes) {
 
 
 function updatePage() {
-    console.log(window.innerWidth, window.innerHeight);
     updateData();
     createDataGraph();
     createDeltaGraph();
+    createHospitalizedGraph();
+    createDeltaHospitalizedGraph();
     createTestsGraph();
 }
 
@@ -268,14 +271,6 @@ function createDataGraph() {
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         borderColor: 'red'
-                    },
-                    {
-                        label: 'Hospitalized',
-                        data: data[hospitalizedIdx],
-                        lineTension: 0.3,
-                        backgroundColor: 'transparent',
-                        borderWidth: 3,
-                        borderColor: 'teal'
                     }
                 ]
             },
@@ -349,14 +344,6 @@ function createDeltaGraph() {
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         borderColor: 'red'
-                    },
-                    {
-                        label: '∆ Hospitalized',
-                        data: data[deltaHospitalizedIdx],
-                        lineTension: 0.3,
-                        backgroundColor: 'transparent',
-                        borderWidth: 3,
-                        borderColor: 'teal'
                     }
                 ]
             },
@@ -383,7 +370,137 @@ function createDeltaGraph() {
         }
         deltaGraph.data.labels = dataToShow[dateIdx];
         for (let i = 0; i < deltaGraph.data.datasets.length; i++) {
-            deltaGraph.data.datasets[i].data = dataToShow[i + 7]
+            deltaGraph.data.datasets[i].data = dataToShow[i + 9]
+        }
+        deltaGraph.update();
+    }
+    return deltaGraph;
+}
+
+
+function createHospitalizedGraph() {
+    if (hospitalizedGraph == null) {
+        let ctx = document.getElementById('hospitalized-chart');
+        dataGraph = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data[dateIdx],
+                datasets: [
+                    {
+                        label: 'Total hospitalized',
+                        data: data[hospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'teal'
+                    },
+                    {
+                        label: 'Symptomatic hospitalized',
+                        data: data[symptomaticHospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'orange'
+                    },
+                    {
+                        label: 'IC hospitalized',
+                        data: data[icHospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'red'
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    fontSize: 18,
+                    text: 'Hospitalized'
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                },
+            }
+        });
+    } else {
+        let dataToShow = [...data];
+        if (!isNaN(daysToShow)) {
+            for (let i = 0; i < dataToShow.length; i++)
+                dataToShow[i] = data[i].slice(Math.max(data[i].length - daysToShow, 0));
+        }
+        dataGraph.data.labels = dataToShow[dateIdx];
+        for (let i = 0; i < dataGraph.data.datasets.length; i++) {
+            dataGraph.data.datasets[i].data = dataToShow[i + 5]
+        }
+        dataGraph.update();
+    }
+    return dataGraph;
+}
+
+
+function createDeltaHospitalizedGraph() {
+    if (deltaHospitalizedGraph == null) {
+        let ctx = document.getElementById('delta-hospitalized-chart');
+        deltaGraph = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data[dateIdx],
+                datasets: [
+                    {
+                        label: '∆ Hospitalized',
+                        data: data[deltaHospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'teal'
+                    },
+                    {
+                        label: '∆ Symptomatic hospitalized',
+                        data: data[deltaSymptomaticHospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'orange'
+                    },
+                    {
+                        label: '∆ IC hospitalized',
+                        data: data[deltaIcHospitalizedIdx],
+                        lineTension: 0.3,
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        borderColor: 'red'
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    fontSize: 18,
+                    text: 'Delta hospitalized'
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                },
+            }
+        });
+    } else {
+        let dataToShow = [...data];
+        if (!isNaN(daysToShow)) {
+            for (let i = 0; i < dataToShow.length; i++)
+                dataToShow[i] = data[i].slice(Math.max(data[i].length - daysToShow, 0));
+        }
+        deltaGraph.data.labels = dataToShow[dateIdx];
+        for (let i = 0; i < deltaGraph.data.datasets.length; i++) {
+            deltaGraph.data.datasets[i].data = dataToShow[i + 13]
         }
         deltaGraph.update();
     }
