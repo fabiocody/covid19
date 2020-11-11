@@ -50,6 +50,7 @@ function btnLombardyClicked() {
 
 function allDataClicked() {
     $('#btn-all-data').addClass('active');
+    $('#btn-90-days').removeClass('active');
     $('#btn-30-days').removeClass('active');
     $('#btn-7-days').removeClass('active');
     daysToShow = NaN;
@@ -57,8 +58,19 @@ function allDataClicked() {
 }
 
 
+function last90DaysClicked() {
+    $('#btn-all-data').removeClass('active');
+    $('#btn-90-days').addClass('active');
+    $('#btn-30-days').removeClass('active');
+    $('#btn-7-days').removeClass('active');
+    daysToShow = 90;
+    updatePage();
+}
+
+
 function last30DaysClicked() {
     $('#btn-all-data').removeClass('active');
+    $('#btn-90-days').removeClass('active');
     $('#btn-30-days').addClass('active');
     $('#btn-7-days').removeClass('active');
     daysToShow = 30;
@@ -68,6 +80,7 @@ function last30DaysClicked() {
 
 function last7DaysClicked() {
     $('#btn-all-data').removeClass('active');
+    $('#btn-90-days').removeClass('active');
     $('#btn-30-days').removeClass('active');
     $('#btn-7-days').addClass('active');
     daysToShow = 7;
@@ -196,7 +209,7 @@ function updatePage() {
 
 
 function getDelta(data) {
-    if (data[1] >= data[0]) {
+    if (parseInt(data[1]) >= parseInt(data[0])) {
         return `+ ${data[1] - data[0]}`;
     } else {
         return `- ${Math.abs(data[1] - data[0])}`;
